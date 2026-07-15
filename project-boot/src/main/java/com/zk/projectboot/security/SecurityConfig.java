@@ -2,6 +2,7 @@ package com.zk.projectboot.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zk.projectboot.dto.ApiResponse;
+import com.zk.projectboot.ratelimit.RateLimitFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,12 +25,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final BlogUserDetailsService userDetailsService;
     private final ObjectMapper objectMapper;
     private final UserStatusValidationFilter userStatusValidationFilter;
+    private final RateLimitFilter rateLimitFilter;
 
     public SecurityConfig(BlogUserDetailsService userDetailsService, ObjectMapper objectMapper,
-                          UserStatusValidationFilter userStatusValidationFilter) {
+                          UserStatusValidationFilter userStatusValidationFilter,
+                          RateLimitFilter rateLimitFilter) {
         this.userDetailsService = userDetailsService;
         this.objectMapper = objectMapper;
         this.userStatusValidationFilter = userStatusValidationFilter;
+        this.rateLimitFilter = rateLimitFilter;
     }
 
     @Bean
@@ -55,6 +59,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http
                 .addFilterAfter(userStatusValidationFilter, SecurityContextPersistenceFilter.class)
+                .addFilterAfter(rateLimitFilter, UserStatusValidationFilter.class)
                 .cors()
                 .and()
                 .csrf()
