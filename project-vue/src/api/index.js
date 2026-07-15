@@ -1,5 +1,7 @@
 import axios from 'axios'
 import config from './config'
+import { ElMessage } from 'element-plus'
+import { classifyApiError } from './errorPolicy'
 
 // 创建一个新的axios实例
 const api = axios.create({
@@ -13,6 +15,36 @@ const api = axios.create({
     'Content-Type': 'application/json'
   }
 })
+
+let lastNotification = { message: '', time: 0 }
+
+const notifyOnce = (message, type = 'warning') => {
+  const now = Date.now()
+  if (lastNotification.message === message && now - lastNotification.time < 1500) return
+  lastNotification = { message, time: now }
+  ElMessage[type](message)
+}
+
+api.interceptors.response.use(
+  response => response,
+  error => {
+    const policy = classifyApiError(error)
+
+    if (policy.action === 'login') {
+      localStorage.removeItem('userInfo')
+      if (window.location.pathname !== '/login') {
+        notifyOnce(policy.message)
+        window.location.assign(`/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`)
+      }
+    } else {
+      notifyOnce(policy.message, policy.action === 'forbidden' ? 'error' : 'warning')
+    }
+
+    return Promise.reject(error)
+  }
+)
+
+/* Legacy interceptor retained temporarily inside this comment while preserving the API exports below.
 
 // 响应拦截器
 api.interceptors.response.use(
@@ -44,6 +76,7 @@ api.interceptors.response.use(
 )
 
 // 身份验证相关API
+*/
 export const authApi = {
   login(credentials) {
     return api.post('/auth/login', credentials).then(async response => {
