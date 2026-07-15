@@ -61,6 +61,9 @@ docs/screenshots/  项目截图存放目录
    - `deploy/mysql/01-schema.sql`
    - `deploy/mysql/02-session-schema.sql`
 
+   如果使用重构前已经存在用户数据的旧数据库，请额外执行
+   `deploy/mysql/migrations/2026-07-15-retention-policy.sql`，将历史账号标记为永久账号；否则空的保留策略会导致登录时枚举转换失败。
+
 2. 配置数据库环境变量，再启动后端：
 
 ```powershell

@@ -123,6 +123,8 @@ cd /opt/blogsys
 ./deploy/backup/backup.sh
 git fetch origin
 git pull --ff-only origin main
+docker compose exec -T mysql sh -c 'mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"' \
+  < deploy/mysql/migrations/2026-07-15-retention-policy.sql
 docker compose up -d --build
 curl --fail http://127.0.0.1/health
 ```
