@@ -70,7 +70,8 @@
             </div>
 
             <div class="article-image" v-if="article.coverImage">
-              <img :src="article.coverImage" :alt="`${article.title || '文章'}封面`">
+              <img :src="article.coverImage" :alt="`${article.title || '文章'}封面`"
+                loading="lazy" decoding="async" width="640" height="360">
             </div>
           </div>
         </div>

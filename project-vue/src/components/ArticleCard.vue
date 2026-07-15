@@ -43,6 +43,10 @@
     <div class="article-image">
       <img
         :src="article?.coverImage || defaultCover"
+        loading="lazy"
+        decoding="async"
+        width="640"
+        height="360"
         :alt="`${article?.title || '文章'}封面`"
         @error="handleImageError"
       >
@@ -56,7 +60,7 @@ import { computed } from 'vue'
 import { formatDate } from '@/utils'
 import { View, ChatLineSquare, Star } from '@element-plus/icons-vue'
 import defaultAvatarImg from '@/assets/default-avatar.png'
-import defaultCoverImg from '@/assets/default-cover.png'
+import defaultCoverImg from '@/assets/default-cover.webp'
 
 export default {
   name: 'ArticleCard',

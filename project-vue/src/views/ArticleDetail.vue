@@ -40,7 +40,8 @@
 
           <!-- 文章封面图 -->
           <div class="article-cover" v-if="article.coverImage">
-            <img :src="article.coverImage" :alt="article.title" @error="handleCoverImageError">
+            <img :src="article.coverImage" :alt="article.title" decoding="async" fetchpriority="high"
+              width="1200" height="675" @error="handleCoverImageError">
           </div>
 
           <!-- 分类和标签 -->
@@ -217,7 +218,7 @@ export default {
     const isLiked = ref(false)
     const isFavorited = ref(false)
     const defaultAvatar = require('@/assets/default-avatar.png')
-    const defaultCover = require('@/assets/default-cover.png')
+    const defaultCover = require('@/assets/default-cover.webp')
 
     const commentCurrentPage = ref(1)
     const commentPageSize = ref(10)

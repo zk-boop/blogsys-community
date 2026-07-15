@@ -27,6 +27,10 @@
       <button class="lead-story" type="button" @click="goToArticle(featuredArticles[0].id)">
         <img
           :src="featuredArticles[0].coverImage || defaultCoverImage"
+          decoding="async"
+          fetchpriority="high"
+          width="1600"
+          height="900"
           :alt="`${featuredArticles[0].title}封面`"
           @error="handleCoverError"
         >
@@ -48,6 +52,10 @@
         >
           <img
             :src="article.coverImage || defaultCoverImage"
+            loading="lazy"
+            decoding="async"
+            width="640"
+            height="360"
             :alt="`${article.title}封面`"
             @error="handleCoverError"
           >
@@ -91,6 +99,10 @@
               <div class="feed-cover">
                 <img
                   :src="article.coverImage || defaultCoverImage"
+                  loading="lazy"
+                  decoding="async"
+                  width="640"
+                  height="360"
                   :alt="`${article.title}封面`"
                   @error="handleCoverError"
                 >
@@ -135,7 +147,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { articleApi, categoryApi, tagApi } from '@/api'
-import defaultCoverImage from '@/assets/default-cover.png'
+import defaultCoverImage from '@/assets/default-cover.webp'
 
 export default {
   name: 'Home',
