@@ -140,9 +140,13 @@ public interface ArticleRepository extends JpaRepository<Article, Integer> {
      * @param pageable 分页和排序信息
      * @return 分页的文章列表
      */
-    @Query(value = "SELECT a.* FROM articles a JOIN article_tags at ON a.id = at.article_id WHERE at.tag_id = :tagId AND a.status = :status ORDER BY a.created_at DESC",
-           nativeQuery = true)
-    Page<Article> findByTagIdAndStatus(@Param("tagId") Integer tagId, @Param("status") String status, Pageable pageable);
+    @Query(value = "SELECT a FROM Article a JOIN a.articleTags articleTag "
+            + "WHERE articleTag.tag.id = :tagId AND a.status = :status",
+            countQuery = "SELECT COUNT(a) FROM Article a JOIN a.articleTags articleTag "
+                    + "WHERE articleTag.tag.id = :tagId AND a.status = :status")
+    Page<Article> findByTagIdAndStatus(@Param("tagId") Integer tagId,
+                                       @Param("status") Article.ArticleStatus status,
+                                       Pageable pageable);
 
     /**
      * 查询指定状态且分类ID在指定列表中的文章

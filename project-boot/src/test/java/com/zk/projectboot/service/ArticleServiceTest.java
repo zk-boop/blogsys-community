@@ -120,6 +120,17 @@ public class ArticleServiceTest {
     }
 
     @Test
+    void testGetArticlesByTagSupportsPublishedAtSort() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "publishedAt"));
+
+        Page<Article> articlePage = articleService.getArticlesByTag(4, pageable);
+
+        assertEquals(1, articlePage.getTotalElements());
+        assertEquals(2, articlePage.getContent().get(0).getId());
+        assertEquals(Article.ArticleStatus.published, articlePage.getContent().get(0).getStatus());
+    }
+
+    @Test
     @Transactional
     void testIncrementViewCount() {
         // 获取当前文章的浏览次数

@@ -164,7 +164,7 @@ public class ArticleServiceImpl implements ArticleService {
      */
     @Override
     public Page<Article> getArticlesByTag(Integer tagId, Pageable pageable) {
-        return articleRepository.findByTagIdAndStatus(tagId, Article.ArticleStatus.published.name(), pageable);
+        return articleRepository.findByTagIdAndStatus(tagId, Article.ArticleStatus.published, pageable);
     }
 
     /**

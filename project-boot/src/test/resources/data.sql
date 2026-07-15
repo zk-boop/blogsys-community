@@ -37,9 +37,13 @@ INSERT INTO articles (id, title, slug, content, excerpt, cover_image, author_id,
 INSERT INTO article_likes (id, article_id, user_id, created_at) VALUES
   (1, 4, 3, CURRENT_TIMESTAMP);
 
+INSERT INTO article_tags (id, article_id, tag_id, created_at) VALUES
+  (1, 2, 4, CURRENT_TIMESTAMP);
+
 ALTER TABLE roles ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE users ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE categories ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE tags ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE articles ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE article_likes ALTER COLUMN id RESTART WITH 100;
+ALTER TABLE article_tags ALTER COLUMN id RESTART WITH 100;
