@@ -71,6 +71,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .sessionFixation().migrateSession()
                 .and()
                 .authorizeRequests()
+                    .antMatchers("/actuator/health").permitAll()
                     .antMatchers("/api/auth/login", "/api/auth/register", "/api/auth/user-info", "/api/auth/csrf").permitAll()
                     .antMatchers(HttpMethod.GET, "/api/articles/**", "/api/categories/**", "/api/tags/**").permitAll()
                     .antMatchers(HttpMethod.GET, "/api/comments/article/**", "/api/comments/replies/**", "/api/comments/*").permitAll()
