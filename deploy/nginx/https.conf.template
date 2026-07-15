@@ -1,14 +1,24 @@
 server {
     listen 80;
-    server_name _;
+    server_name ${APP_DOMAIN};
+    location /.well-known/acme-challenge/ { root /var/www/certbot; }
+    location / { return 301 https://$host$request_uri; }
+}
+
+server {
+    listen 443 ssl http2;
+    server_name ${APP_DOMAIN};
     root /usr/share/nginx/html;
     index index.html;
 
-    client_max_body_size 5m;
+    ssl_certificate /etc/letsencrypt/live/${APP_DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${APP_DOMAIN}/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:SSL:10m;
 
+    client_max_body_size 5m;
     gzip on;
     gzip_vary on;
-    gzip_min_length 1024;
     gzip_types text/plain text/css application/javascript application/json image/svg+xml;
 
     location ^~ /api/ {
@@ -22,8 +32,6 @@ server {
 
     location = /health {
         proxy_pass http://backend:8080/actuator/health;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     location ~* \.(?:js|css|webp|png|jpg|jpeg|svg|woff2)$ {
@@ -32,11 +40,6 @@ server {
         add_header Cache-Control "public, immutable";
     }
 
-    location = /index.html {
-        add_header Cache-Control "no-cache";
-    }
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
+    location = /index.html { add_header Cache-Control "no-cache"; }
+    location / { try_files $uri $uri/ /index.html; }
 }

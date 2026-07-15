@@ -2,44 +2,90 @@ services:
   mysql:
     image: mysql:8.0
     restart: unless-stopped
+    mem_limit: 640m
+    expose:
+      - "3306"
     environment:
-      MYSQL_DATABASE: blog_sys
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-blog_sys}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
+      MYSQL_USER: ${MYSQL_APP_USER:-blogsys}
+      MYSQL_PASSWORD: ${MYSQL_APP_PASSWORD:?MYSQL_APP_PASSWORD is required}
       TZ: Asia/Shanghai
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --innodb-buffer-pool-size=384M
+      - --max-connections=100
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./testxwf.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./deploy/mysql/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./deploy/mysql/02-session-schema.sql:/docker-entrypoint-initdb.d/02-session-schema.sql:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
-      interval: 5s
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      interval: 10s
       timeout: 5s
-      retries: 30
+      retries: 20
+      start_period: 30s
+    logging: &default-logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   backend:
     build: ./project-boot
     restart: unless-stopped
+    mem_limit: 512m
+    expose:
+      - "8080"
     environment:
-      DB_URL: jdbc:mysql://mysql:3306/blog_sys?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
-      DB_USERNAME: root
-      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
+      SPRING_PROFILES_ACTIVE: prod
+      JAVA_TOOL_OPTIONS: -Xms128m -Xmx384m -XX:+UseSerialGC
+      DB_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-blog_sys}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+      DB_USERNAME: ${MYSQL_APP_USER:-blogsys}
+      DB_PASSWORD: ${MYSQL_APP_PASSWORD:?MYSQL_APP_PASSWORD is required}
       UPLOAD_DIR: /app/uploads
       AVATAR_DIR: /app/uploads/avatars
       COVER_DIR: /app/uploads/covers
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+      CLEANUP_ENABLED: ${CLEANUP_ENABLED:-true}
+      DEMO_SEED_ENABLED: ${DEMO_SEED_ENABLED:-false}
+      DEMO_ADMIN_USERNAME: ${DEMO_ADMIN_USERNAME:-admin}
+      DEMO_ADMIN_EMAIL: ${DEMO_ADMIN_EMAIL:-admin@example.invalid}
+      DEMO_ADMIN_PASSWORD: ${DEMO_ADMIN_PASSWORD:-}
+      DEMO_USER_USERNAME: ${DEMO_USER_USERNAME:-demo}
+      DEMO_USER_EMAIL: ${DEMO_USER_EMAIL:-demo@example.invalid}
+      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:-}
       TZ: Asia/Shanghai
     depends_on:
       mysql:
         condition: service_healthy
     volumes:
       - uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 45s
+    logging: *default-logging
 
   frontend:
     build: ./project-vue
     restart: unless-stopped
+    mem_limit: 128m
     ports:
-      - "${APP_PORT:-80}:80"
+      - "${APP_HTTP_PORT:-80}:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://localhost/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    logging: *default-logging
 
 volumes:
   mysql_data:
