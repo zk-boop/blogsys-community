@@ -2,10 +2,10 @@ INSERT INTO roles (id, role_name, role_description, permissions, created_at, upd
   (1, 'ROLE_ADMIN', 'System administrator', '["all"]', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (2, 'ROLE_USER', 'Regular user', '["comment","like","favorite"]', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
-INSERT INTO users (id, username, email, password_hash, nickname, avatar, bio, role_id, status, last_login, created_at, updated_at) VALUES
-  (1, 'admin', 'admin@blog.com', '$2b$10$cEEQFzuENWeu.lNXGOQ7n.J/o75oSMesgjmIZglZGs1u10oZKRIOG', 'Administrator', NULL, NULL, 1, 'active', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (3, 'lisi', 'lisi@blog.com', '$2b$10$cEEQFzuENWeu.lNXGOQ7n.J/o75oSMesgjmIZglZGs1u10oZKRIOG', 'Li Si', NULL, NULL, 2, 'active', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (4, 'wangwu', 'wangwu@blog.com', '$2b$10$cEEQFzuENWeu.lNXGOQ7n.J/o75oSMesgjmIZglZGs1u10oZKRIOG', 'Wang Wu', NULL, NULL, 2, 'active', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO users (id, username, email, password_hash, nickname, avatar, bio, role_id, status, retention_policy, last_login, created_at, updated_at) VALUES
+  (1, 'admin', 'admin@blog.com', '$2b$10$cEEQFzuENWeu.lNXGOQ7n.J/o75oSMesgjmIZglZGs1u10oZKRIOG', 'Administrator', NULL, NULL, 1, 'active', 'PERMANENT', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (3, 'lisi', 'lisi@blog.com', '$2b$10$cEEQFzuENWeu.lNXGOQ7n.J/o75oSMesgjmIZglZGs1u10oZKRIOG', 'Li Si', NULL, NULL, 2, 'active', 'PERMANENT', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (4, 'wangwu', 'wangwu@blog.com', '$2b$10$cEEQFzuENWeu.lNXGOQ7n.J/o75oSMesgjmIZglZGs1u10oZKRIOG', 'Wang Wu', NULL, NULL, 2, 'active', 'PERMANENT', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO categories (id, name, description, parent_id, sort_order, status, created_at, updated_at) VALUES
   (1, '技术', 'Technology', NULL, 1, '1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),

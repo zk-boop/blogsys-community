@@ -92,6 +92,10 @@ public class User implements Serializable {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "retention_policy", nullable = false, length = 16)
+    private RetentionPolicy retentionPolicy = RetentionPolicy.EPHEMERAL;
+
     /**
      * 用户最后登录时间
      */
@@ -169,6 +173,11 @@ public class User implements Serializable {
         active,    // 活跃状态，正常使用
         inactive,  // 非活跃状态，可能需要激活
         banned     // 被禁用状态，不能登录和使用系统
+    }
+
+    public enum RetentionPolicy {
+        PERMANENT,
+        EPHEMERAL
     }
 
     /**

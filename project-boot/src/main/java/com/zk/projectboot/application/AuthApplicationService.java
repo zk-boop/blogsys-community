@@ -83,6 +83,7 @@ public class AuthApplicationService {
         user.setAvatar(request.getAvatar());
         user.setRole(role);
         user.setStatus(User.UserStatus.active);
+        user.setRetentionPolicy(User.RetentionPolicy.EPHEMERAL);
         return userRepository.save(user);
     }
 

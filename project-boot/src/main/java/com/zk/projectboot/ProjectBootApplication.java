@@ -2,6 +2,7 @@ package com.zk.projectboot;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * 项目启动类
@@ -10,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * 它自动配置Spring应用程序，扫描组件并注册bean
  */
 @SpringBootApplication
+@EnableScheduling
 public class ProjectBootApplication {
 
     /**
