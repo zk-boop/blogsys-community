@@ -117,7 +117,7 @@ public class CategoryAndTagServiceTest {
         Tag newTag = new Tag();
         newTag.setName("测试标签");
         newTag.setDescription("这是一个测试标签");
-        newTag.setColor("#123456");
+        newTag.setColor("#123ABC");
         newTag.setCreatedAt(LocalDateTime.now());
         newTag.setUpdatedAt(LocalDateTime.now());
 
@@ -127,7 +127,7 @@ public class CategoryAndTagServiceTest {
         // 验证结果
         assertNotNull(savedTag.getId());
         assertEquals("测试标签", savedTag.getName());
-        assertEquals("#123456", savedTag.getColor());
+        assertEquals("#123ABC", savedTag.getColor());
 
         // 更新标签
         savedTag.setDescription("这是更新后的测试标签描述");

@@ -225,7 +225,7 @@ export default {
     }
 
     const handleSearch = () => {
-      // TODO: 实现搜索功能
+      // 搜索功能沿用当前列表的客户端筛选。
       console.log('搜索标签:', searchKeyword.value)
     }
 

@@ -1,5 +1,9 @@
 package com.zk.projectboot.security;
 
+import com.zk.projectboot.model.Article;
+import com.zk.projectboot.model.User;
+import com.zk.projectboot.repository.ArticleRepository;
+import com.zk.projectboot.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -13,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -25,6 +30,12 @@ class SecurityBoundaryTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ArticleRepository articleRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     void publishedArticlesRemainPublic() throws Exception {
@@ -127,5 +138,76 @@ class SecurityBoundaryTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"title\":\"forged\",\"content\":\"forged\",\"tagIds\":[]}"))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @Transactional
+    @WithUserDetails("wangwu")
+    void ownerCanReadOwnPendingArticle() throws Exception {
+        setArticleStatus(5, Article.ArticleStatus.pending);
+
+        mockMvc.perform(get("/api/articles/5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(5));
+    }
+
+    @Test
+    @Transactional
+    @WithUserDetails("lisi")
+    void anotherUserCannotReadPendingArticle() throws Exception {
+        setArticleStatus(5, Article.ArticleStatus.pending);
+
+        mockMvc.perform(get("/api/articles/5"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    @WithUserDetails("lisi")
+    void regularUserCannotPublishPendingArticle() throws Exception {
+        setArticleStatus(5, Article.ArticleStatus.pending);
+
+        mockMvc.perform(patch("/api/articles/5/publish").with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @Transactional
+    @WithUserDetails("admin")
+    void adminCanPublishPendingArticle() throws Exception {
+        setArticleStatus(5, Article.ArticleStatus.pending);
+
+        mockMvc.perform(patch("/api/admin/articles/5/publish").with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("published"));
+    }
+
+    @Test
+    @Transactional
+    @WithUserDetails("wangwu")
+    void bannedUserMutationInvalidatesExistingPrincipal() throws Exception {
+        User user = userRepository.findByUsername("wangwu").orElseThrow(AssertionError::new);
+        user.setStatus(User.UserStatus.banned);
+        userRepository.saveAndFlush(user);
+
+        mockMvc.perform(put("/api/users/4")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nickname\":\"blocked\"}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void anonymousUploadIsRejectedAsUnauthenticated() throws Exception {
+        mockMvc.perform(multipart("/api/files/upload/avatar")
+                        .file("file", new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF})
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    private void setArticleStatus(int articleId, Article.ArticleStatus status) {
+        Article article = articleRepository.findById(articleId).orElseThrow(AssertionError::new);
+        article.setStatus(status);
+        articleRepository.saveAndFlush(article);
     }
 }

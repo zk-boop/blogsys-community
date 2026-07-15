@@ -1,0 +1,11 @@
+services:
+  frontend:
+    ports:
+      - "${APP_HTTPS_PORT:-443}:443"
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?APP_DOMAIN is required for HTTPS}
+      NGINX_ENVSUBST_FILTER: APP_DOMAIN
+    volumes:
+      - ./deploy/nginx/https.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot:ro

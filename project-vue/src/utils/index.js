@@ -55,7 +55,7 @@ export function htmlToText(html) {
 
 // 获取随机颜色
 export function getRandomColor() {
-  const letters = '0123456789ABCDEF'
+  const letters = 'A0B1C2D3E4F59687'
   let color = '#'
   for (let i = 0; i < 6; i++) {
     color += letters[Math.floor(Math.random() * 16)]
